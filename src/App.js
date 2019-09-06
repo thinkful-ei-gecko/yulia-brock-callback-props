@@ -1,17 +1,39 @@
 import React, { Component } from 'react';
 import List from './List'
 import './App.css';
+import STORE from './STORE';
+
+function omit(obj, keyToOmit) {
+  return Object.entries(obj).reduce(
+    (newObj, [key, value]) =>
+        key === keyToOmit ? newObj : {...newObj, [key]: value},
+    {}
+  );
+}
+
 
 class App extends Component {
-  static defaultProps = {
-    store: {
-      lists: [],
-      allCards: {},
-    }
+  state = {
+    store: STORE,
   };
 
+ 
+  handleDeleteItem = (cardId) => {
+    const { lists, allCards } = this.state.store; 
+    const newLists = lists.map(list => ({ ...list, cardIds: list.cardIds.filter(id => id !== cardId) }));
+    const newCards = omit(allCards, cardId);
+   
+    console.log(newCards)
+    this.setState({
+        store: {
+          lists: newLists,
+          allCards: newCards
+        }
+       })
+  }
+
   render() {
-    const { store } = this.props
+    const {store}= this.state
     return (
       <main className='App'>
         <header className='App-header'>
@@ -21,8 +43,10 @@ class App extends Component {
           {store.lists.map(list => (
             <List
               key={list.id}
+              id={list.id}
               header={list.header}
               cards={list.cardIds.map(id => store.allCards[id])}
+              handleDelete={(id) => this.handleDeleteItem(id)}
             />
           ))}
         </div>
